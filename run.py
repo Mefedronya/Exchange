@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.registrarion import router as registration_router
 from api.authent import router as auth_router
 from api.virt_currency import router as currency_router
+from api.chats import router as chats_router
 
 app = FastAPI()
 
@@ -19,6 +20,7 @@ app.add_middleware(
 app.include_router(registration_router)
 app.include_router(auth_router)
 app.include_router(currency_router)
+app.include_router(chats_router)
 
 @app.get("/")
 def read_root():

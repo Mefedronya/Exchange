@@ -3,14 +3,16 @@ from datetime import datetime
 from typing import Optional, List
 
 class AccountCreate(BaseModel):
-    username : str = Field(..., max_length=40, description="Имя пользователя, максимум 40 символов")
-    password : str = Field(..., min_length=6, description="Пароль, минимум 6 символов")
-    first_name : Optional[str] = Field(None, max_length=80, description="Имя, максимум 80 символов")
-    surname : Optional[str] = Field(None, max_length=80, description="Фамилия, максимум 80 символов")
-    @validator('username')
-    def username_must_not_be_empty(cls, v):
-        if not v.isalnum():
-            raise ValueError('Username must not be empty')
+    username: str = Field(..., max_length=50, description="Имя пользователя")
+    password: str = Field(..., min_length=6, description="Пароль")
+    first_name: Optional[str] = Field(None, max_length=80)
+    surname: Optional[str] = Field(None, max_length=80)
+
+    @field_validator('username')
+    @classmethod
+    def username_must_be_alnum(cls, v):
+        if not v or not v.isalnum():
+            raise ValueError('Username должен содержать только буквы и цифры')
         return v
 
 class AccountResponse(BaseModel):
@@ -34,16 +36,27 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 
-# models moved from virt_currency
+# valyta
 
 class currencyItem(BaseModel):
     id: Optional[int] = None
+    user_id: int
     quantity: int
     get_Time: Optional[datetime] = None
     model_config = ConfigDict(from_attributes=True)
 
 class currcreate(BaseModel):
-    quantity: int
+    quantity: int = Field(..., ge= 0, description="кол-во валюты")
+    
+
+class currupdate(BaseModel): 
+    quantity: int = Field(...,ge=8,  description="Новое количество валюты")
+    
+class currdel(BaseModel):
+    amount: int = Field(..., gt=0, description="Количество валюты для удаления")
+
+    
+#пользователи
 
 class UserCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -106,4 +119,30 @@ class MessagesResponse(BaseModel):
     MessagesText: str  
     sentAt: datetime 
     isRead: bool   #####################
+    model_config = ConfigDict(from_attributes=True)
+
+#уроки
+class lessonsCreate(BaseModel):
+    title:str
+    description: Optional[str] = None
+    content: Optional[str] = None
+    video_url: Optional[str] = None
+    cost: int = 0
+    reward: int = 0
+    is_premium: bool = False
+class lessonsResponse(BaseModel):
+    id: int
+    title: int
+    description: Optional[str]
+    cost: int
+    reward: int
+    is_published: bool
+    model_config = ConfigDict(from_attributes=True)
+#прогрессы
+class userLessonProgressresponse(BaseModel):
+    id:int
+    lesson_id:int
+    status: str
+    currency_earned: int
+    score: int
     model_config = ConfigDict(from_attributes=True)
