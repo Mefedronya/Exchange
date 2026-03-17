@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "9c0ff8c9299ea0832b4b0c6361a4324ac84159806d
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 class TokenData(BaseModel):
     username: Optional[str] = None
