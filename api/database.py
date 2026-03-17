@@ -27,7 +27,7 @@ class DBManager:
 db_manager = DBManager(DB_CONNECTION_STRING)
 
 SQLALCHEMY_DATABASE_URL = (
-    "mssql+pyodbc://DESKTOP-P5B9MPU\\SQLEXPRESS/it_planet"
+    "mssql+pyodbc://DESKTOP-P5B9MPU\\SQLEXPRESS/it_planet?"
     "driver=ODBC+Driver+17+for+SQL+Server&"
     "trusted_connection=yes"
 )

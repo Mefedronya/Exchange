@@ -20,8 +20,7 @@ class AccountResponse(BaseModel):
     surname: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AccountLogin(BaseModel):
     username : str 
@@ -72,3 +71,39 @@ class UserResponse(BaseModel):
 class userLogin(BaseModel):
     username: str
     password: str
+
+class ChatCreate(BaseModel):
+    message: str = Field(..., max_length=500, description="Сообщение чата, максимум 500 символов")
+
+class ChatResponse(BaseModel):
+    id: int
+    user_id: int
+    message: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class ChatsCreate(BaseModel):
+    ChatName: str = Field(..., max_length=100, description="Название чата, максимум 100 символов")
+    #user1_id: int = Field(..., description="ID первого участника")
+    user2_id: int = Field(..., description="ID второго участника")
+
+class ChatsResponse(BaseModel):
+    ChatID: int
+    ChatName: str
+    CreatedAt: datetime 
+    user1_id: int ###################
+    user2_id: int ###################
+    model_config = ConfigDict(from_attributes=True)
+
+class MessagesCreate(BaseModel):
+    chat_Id: int
+    MessagesText: str
+
+class MessagesResponse(BaseModel):
+    id: int
+    chat_Id: int
+    user_Id: int
+    MessagesText: str  
+    sentAt: datetime 
+    isRead: bool   #####################
+    model_config = ConfigDict(from_attributes=True)
