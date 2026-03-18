@@ -4,6 +4,9 @@ from api.registrarion import router as registration_router
 from api.authent import router as auth_router
 from api.virt_currency import router as currency_router
 from api.chats import router as chats_router
+from api.reviews import router as reviews_router
+from api.lessons import router as lessons_router
+from api.user_schedule import router as user_schedule_router
 
 app = FastAPI()
 
@@ -21,6 +24,9 @@ app.include_router(registration_router)
 app.include_router(auth_router)
 app.include_router(currency_router)
 app.include_router(chats_router)
+app.include_router(reviews_router)
+app.include_router(lessons_router)
+app.include_router(user_schedule_router)
 
 @app.get("/")
 def read_root():
