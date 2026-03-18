@@ -7,6 +7,7 @@ from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 import pyodbc
+from .database import DB_CONFIG
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -43,7 +44,9 @@ class databaseManager:
         self.connection_string = (f"DRIVER={{ODBC Driver 17 for SQL Server}};"
                                   f"SERVER={self.server};"
                                   f"DATABASE={self.database};"
-                                  "Trusted_Connection=yes;")
+                                  f"UID={DB_CONFIG['username']};"
+                                  f"PWD={DB_CONFIG['password']};"
+                                  )
         
     def get_connection(self):
         return pyodbc.connect(self.connection_string) 
