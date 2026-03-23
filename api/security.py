@@ -7,7 +7,10 @@ from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 import pyodbc
+from dotenv import load_dotenv
 
+# Загружаем переменные окружения
+load_dotenv()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -21,39 +24,57 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 def verify_password(plain_password, hashed_password):
-    #проверка пароля на соответствие хэшу
     return pwd_context.verify(plain_password, hashed_password)
+
 def get_password_hash(password: str):
-    #хэширование пароля
     return pwd_context.hash(password)
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-class databaseManager:
+# ✅ ИСПРАВЛЕННЫЙ КЛАСС ПОДКЛЮЧЕНИЯ
+class DatabaseManager:
     def __init__(self):
-        self.server = 'DESKTOP-P5B9MPU\\SQLEXPRESS'
-        self.database = 'it_planet'
-        self.connection_string = (f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-                                  f"SERVER={self.server};"
-                                  f"DATABASE={self.database};"
-                                  "Trusted_Connection=yes;")
+        # Берем настройки из переменных окружения (как в run.py)
+        self.server = os.getenv("DB_SERVER", "localhost")
+        self.port = os.getenv("DB_PORT", "1433")
+        self.database = os.getenv("DB_NAME", "it_planet")
+        self.username = os.getenv("DB_USER", "sa")
+        self.password = os.getenv("DB_PASSWORD", "")
+        self.driver = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
+        self.trust_cert = os.getenv("DB_TRUST_CERT", "yes").lower() == "yes"
+        
+        # ✅ Единая строка подключения с TrustServerCertificate
+        self.connection_string = (
+            f"DRIVER={{{self.driver}}};"
+            f"SERVER={self.server},{self.port};"
+            f"DATABASE={self.database};"
+            f"UID={self.username};"
+            f"PWD={self.password};"
+            f"TrustServerCertificate={'yes' if self.trust_cert else 'no'};"
+            f"Connection Timeout=30;"
+        )
         
     def get_connection(self):
-        return pyodbc.connect(self.connection_string) 
+        return pyodbc.connect(self.connection_string)
 
-db_manager = databaseManager()
-# Проверка подключения при старте (опционально)
+db_manager = DatabaseManager()
+
+# Проверка подключения при старте
 try:
-    db_manager.get_connection().close()
+    conn = db_manager.get_connection()
+    conn.close()
+    print("✅ Security module: Database connection verified!")
 except Exception as e:
-    print(f"Warning: Could not connect to DB at startup: {e}")
+    print(f"❌ Security module: Database connection failed: {e}")
+    # Не прерываем запуск, но логируем ошибку
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -90,4 +111,5 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
                 "created_at": user_row[4]
             }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка базы данных: {e}")
+        print(f"❌ Database error in get_current_user: {e}")
+        raise HTTPException(status_code=500, detail=f"Ошибка базы данных: {str(e)}")

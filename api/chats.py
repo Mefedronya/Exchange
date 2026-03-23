@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from api.database import get_db
-from api.models import Chats, Messages
-from api.schemas import ChatsCreate, ChatsResponse, MessagesCreate, MessagesResponse
-from api.security import get_current_user
-from api.models import Account
+from .database import get_db
+from .models import Chats, Messages
+from .schemas import ChatsCreate, ChatsResponse, MessagesCreate, MessagesResponse
+from .security import get_current_user
+from .models import Account
 import traceback
-from api.security import get_current_user
+from .security import get_current_user
 
 router = APIRouter(tags=["Chats"], prefix="/Chatiks")
 
